@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Community Health Companion</title>
+  <style>
+    /* ----- Basic layout & theme ----- */
+    :root{
+      --bg:#f8f8f8; --card:#fff; --text:#222; --accent:#4CAF50;
+      --dark-bg:#0f1112; --dark-card:#131415; --dark-text:#eee;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);transition:background .2s,color .2s}
+    header{background:var(--accent);color:#fff;padding:22px;text-align:center}
+    nav{background:#222;padding:10px;text-align:center}
+    nav a{color:#fff;margin:0 10px;text-decoration:none;font-weight:600}
+    main{max-width:980px;margin:18px auto;padding:0 12px}
+    section{background:var(--card);margin:18px 0;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    h1,h2{margin:0 0 8px 0}
+    h2{color:var(--accent)}
+    ul{margin:8px 0 0 18px}
+    #map{height:260px;background:linear-gradient(180deg,#e6f4ea,#fff);display:flex;align-items:center;justify-content:center;color:#666;border-radius:8px}
+    /* dark mode */
+    body.dark{background:var(--dark-bg);color:var(--dark-text)}
+    body.dark section{background:var(--dark-card)}
+    body.dark nav{background:#111}
+    /* small interface pieces */
+    #darkModeToggle{position:fixed;right:16px;bottom:16px;padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}nav a{display:inline-block;margin:6px}}
+    .note{background:rgba(76,175,80,.08);padding:10px;border-radius:8px;color:#2f6b3a}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Community Health Companion</h1>
+    <div>Easy, clear health support for families and caregivers</div>
+  </header>
+
+  <nav>
+    <a href="#caregiver">Caregiver</a>
+    <a href="#tips">Health Tips</a>
+    <a href="#emergency">Emergency</a>
+    <a href="#clinics">Clinics</a>
+    <a href="#firstaid">First Aid</a>
+    <a href="#about">About</a>
+  </nav>
+
+  <main>
+    <section id="caregiver">
+      <h2>Caregiver Corner</h2>
+      <p class="note"><strong>You're doing important work.</strong> Small habits protect your well-being — rest, water, and asking for help when you need it.</p>
+      <h3>Quick tips</h3>
+      <ul>
+        <li>Take short breaks (5–10 min) every few hours.</li>
+        <li>Eat small, regular meals and keep a water bottle near you.</li>
+        <li>Share tasks with family or neighbors when possible.</li>
+        <li>Talk with a teacher or counselor if schoolwork piles up.</li>
+      </ul>
+    </section>
+
+    <div class="grid">
+      <div>
+        <section id="tips">
+          <h2>Health Tips</h2>
+          <ul id="tips-list"></ul>
+        </section>
+
+        <section id="firstaid">
+          <h2>First Aid Guide</h2>
+          <div id="firstaid-list"></div>
+          <p style="margin-top:8px;color:#666;font-size:.95rem">If you're unsure, seek professional care — these are quick stabilizing steps only.</p>
+        </section>
+      </div>
+
+      <aside>
+        <section id="emergency">
+          <h2>Emergency Contacts</h2>
+          <ul id="emergency-list"></ul>
+        </section>
+
+        <section id="clinics">
+          <h2>Clinics Near You</h2>
+          <div id="map">Map placeholder — add your Google Maps API key later</div>
+          <p style="font-size:.92rem;color:#666;margin-top:8px">Tip: When ready, we can add an interactive map with markers for local clinics.</p>
+        </section>
+
+        <section id="about" style="margin-top:10px">
+          <h2>About Me</h2>
+          <p>I am Lynette — this project grew from my experience caring for my grandmother. It’s built to help caregivers and families access clear, useful health info quickly.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <button id="darkModeToggle" aria-pressed="false">Toggle Dark Mode</button>
+
+  <script>
+    /* ===== interactive content (built-in) ===== */
+    // dark mode toggle + remember preference
+    const btn = document.getElementById('darkModeToggle');
+    const preferDark = localStorage.getItem('chc-dark') === '1';
+    if(preferDark) document.body.classList.add('dark'), btn.setAttribute('aria-pressed','true');
+    btn.addEventListener('click', () => {
+      const on = document.body.classList.toggle('dark');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      localStorage.setItem('chc-dark', on ? '1' : '0');
+    });
+
+    // tips
+    const tips = [
+      "Drink 6–8 glasses of water daily",
+      "Eat at least one fresh fruit or vegetable each day",
+      "Take a 10-minute walk to boost mood and energy",
+      "Wash hands frequently to reduce infection risk",
+      "Sleep when possible — short naps restore focus"
+    ];
+    const tipsList = document.getElementById('tips-list');
+    tips.forEach(t => { const li = document.createElement('li'); li.textContent = t; tipsList.appendChild(li); });
+
+    // first aid quick cards
+    const firstaid = {
+      "Burns": ["Cool the burn under running water for 10 minutes", "Cover with a clean non-stick dressing", "Seek care for large or deep burns"],
+      "Cuts": ["Clean gently with clean water", "Apply pressure with a clean cloth to stop bleeding", "Cover with sterile dressing"],
+      "Fever": ["Keep hydrated", "Use a cool, damp cloth on forehead", "Seek care if very high or in infants"],
+      "Choking": ["Encourage coughing if able", "If cannot breathe, call emergency and perform back blows and abdominal thrusts (Heimlich) if trained"],
+      "Dehydration": ["Give small sips of clean water or oral rehydration", "Seek care if unable to drink or confused"]
+    };
+    const faDiv = document.getElementById('firstaid-list');
+    Object.keys(firstaid).forEach(key => {
+      const h = document.createElement('h4'); h.textContent = key; faDiv.appendChild(h);
+      const ul = document.createElement('ul');
+      firstaid[key].forEach(step => { const li = document.createElement('li'); li.textContent = step; ul.appendChild(li); });
+      faDiv.appendChild(ul);
+    });
+
+    // emergency contacts
+    const contacts = [
+      {name:"Police",number:"999 / 112"},
+      {name:"Ambulance (St John)",number:"1199"},
+      {name:"Kenya Red Cross",number:"0700 395 395"},
+      {name:"Suicide Prevention Hotline",number:"1190"},
+      {name:"Gender-Based Violence Hotline",number:"1195"}
+    ];
+    const emEl = document.getElementById('emergency-list');
+    contacts.forEach(c => {
+      const li = document.createElement('li');
+      const strong = document.createElement('strong'); strong.textContent = c.name + ': ';
+      li.appendChild(strong);
+      li.appendChild(document.createTextNode(c.number));
+      emEl.appendChild(li);
+    });
+
+    // optional: clinic sample list (editable)
+    const clinics = [
+      {name:"Jaramogi Oginga Odinga Teaching Hospital",info:"Kisumu — 24/7 — Phone: 057 202 0723"},
+      {name:"Aga Khan Hospital",info:"Kisumu — Emergency services — Phone: 0709 931 300"}
+    ];
+    // add clinics below the map as a simple list (if you want)
+    const mapDiv = document.getElementById('map');
+    const clinicList = document.createElement('div');
+    clinicList.style.marginTop = "10px";
+    clinics.forEach(c => {
+      const p = document.createElement('p'); p.style.margin="6px 0"; p.innerHTML = `<strong>${c.name}</strong><br><small style="color:#666">${c.info}</small>`;
+      clinicList.appendChild(p);
+    });
+    mapDiv.appendChild(clinicList);
+  </script>
+</body>
+</html>
